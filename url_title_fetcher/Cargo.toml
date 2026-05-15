@@ -1,0 +1,10 @@
+[package]
+name = "url_title_fetcher"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+tokio = { version = "1", features = ["full"] }
+reqwest = "0.12"
+anyhow = "1"
+scraper = "0.19"
