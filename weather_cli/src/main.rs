@@ -65,17 +65,39 @@ async fn main() -> Result<()> {
         anyhow::bail!("please provide cities");
     }
 
-    let tasks = cities
+    let handles: Vec<_> = cities
         .into_iter()
-        .map(fetch_weather);
+        .map(|city| {
+            tokio::spawn(fetch_weather(city))
+        })
+        .collect();
 
-    let results = join_all(tasks).await;
+    for handle in handles {
+        match handle.await {
+            Ok(result) => {
+                if let Err(e) = result {
+                    eprintln!("task error: {e}");
+                }
+            }
 
-    for result in results {
-        if let Err(e) = result {
-            eprintln!("error: {e}");
+            Err(e) => {
+                eprintln!("join error: {e}")
+            }
         }
     }
+
+    // シンプルな並行処理
+    // let tasks = cities
+    //     .into_iter()
+    //     .map(fetch_weather);
+
+    // let results = join_all(tasks).await;
+
+    // for result in results {
+    //     if let Err(e) = result {
+    //         eprintln!("error: {e}");
+    //     }
+    // }
 
     Ok(())
 }
